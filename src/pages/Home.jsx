@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const Home = () => {
   const heroRef = useRef(null);
+  const animationId = useRef(null); // To store the animation frame ID
 
   useEffect(() => {
     // Set up the scene, camera, and renderer
@@ -57,7 +58,7 @@ const Home = () => {
 
     // Animation loop
     const animate = () => {
-      requestAnimationFrame(animate);
+      animationId.current = requestAnimationFrame(animate);
 
       // Rotate the group continuously
       modelGroup.rotation.y += 0.01; // Continuous rotation around Y-axis
@@ -68,7 +69,30 @@ const Home = () => {
 
     // Cleanup on component unmount
     return () => {
-      heroRef.current.removeChild(renderer.domElement);
+      // Stop the animation loop
+      if (animationId.current) {
+        cancelAnimationFrame(animationId.current);
+      }
+
+      // Remove the renderer's DOM element
+      if (heroRef.current) {
+        heroRef.current.removeChild(renderer.domElement);
+      }
+
+      // Dispose of the scene, geometry, and materials
+      scene.traverse((object) => {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach((material) => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      });
+
+      // Dispose of the renderer
+      renderer.dispose();
     };
   }, []);
 
