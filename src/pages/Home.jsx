@@ -1,16 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const Home = () => {
   const heroRef = useRef(null);
   const animationId = useRef(null); // To store the animation frame ID
+  const [isLoading, setIsLoading] = useState(true); // Loading state
 
   useEffect(() => {
-    // Set up the scene, camera, and renderer
     const scene = new THREE.Scene();
-
-    // Set a blue sea/ocean-like background color
     scene.background = new THREE.Color(0x87ceeb); // Light blue color
 
     const camera = new THREE.PerspectiveCamera(
@@ -19,36 +17,31 @@ const Home = () => {
       0.1,
       1000
     );
-
-    // Move the camera further away from the model
     camera.position.z = 5;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth * 0.8, window.innerHeight * 0.8); // Make the canvas smaller
+    renderer.setSize(window.innerWidth * 0.8, window.innerHeight * 0.8);
     heroRef.current.appendChild(renderer.domElement);
 
-    // Add brighter lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Increased intensity
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffffff, 2); // Increased intensity
+    const pointLight = new THREE.PointLight(0xffffff, 2);
     pointLight.position.set(5, 5, 5);
     scene.add(pointLight);
 
-    // Load the GLTF model
     const loader = new GLTFLoader();
-    let modelGroup = new THREE.Group(); // Group to center the rotation
+    let modelGroup = new THREE.Group();
     scene.add(modelGroup);
 
     loader.load(
-      "/AUV.glb", // Correct path to your model in the public folder
+      "/AUV.glb",
       (gltf) => {
         const model = gltf.scene;
-        model.scale.set(0.3, 0.3, 0.3); // Make the model smaller
-
-        // Adjust the model's position to center its rotation
-        model.position.y = -0.5; // Adjust based on the model's height
-        modelGroup.add(model); // Add the model to the group
+        model.scale.set(0.3, 0.3, 0.3);
+        model.position.y = -0.5;
+        modelGroup.add(model);
+        setIsLoading(false); // Hide loading screen when model is loaded
       },
       undefined,
       (error) => {
@@ -56,55 +49,41 @@ const Home = () => {
       }
     );
 
-    // Animation loop
     const animate = () => {
       animationId.current = requestAnimationFrame(animate);
-
-      // Rotate the group continuously
-      modelGroup.rotation.y += 0.01; // Continuous rotation around Y-axis
-
+      modelGroup.rotation.y += 0.01;
       renderer.render(scene, camera);
     };
     animate();
 
-    // Cleanup on component unmount
     return () => {
-      // Stop the animation loop
-      if (animationId.current) {
-        cancelAnimationFrame(animationId.current);
-      }
-
-      // Remove the renderer's DOM element
-      if (heroRef.current) {
-        heroRef.current.removeChild(renderer.domElement);
-      }
-
-      // Dispose of the scene, geometry, and materials
+      if (animationId.current) cancelAnimationFrame(animationId.current);
+      if (heroRef.current) heroRef.current.removeChild(renderer.domElement);
       scene.traverse((object) => {
         if (object.geometry) object.geometry.dispose();
         if (object.material) {
-          if (Array.isArray(object.material)) {
-            object.material.forEach((material) => material.dispose());
-          } else {
-            object.material.dispose();
-          }
+          if (Array.isArray(object.material)) object.material.forEach((mat) => mat.dispose());
+          else object.material.dispose();
         }
       });
-
-      // Dispose of the renderer
       renderer.dispose();
     };
   }, []);
 
   return (
     <div className="home">
-      {/* Hero Section */}
+      {isLoading && (
+        <div className="loading-screen">
+          <div className="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      )}
+      
       <section className="hero" ref={heroRef}>
         <h1>Welcome to AUV MITB</h1>
         <p>Exploring the depths with cutting-edge autonomous technology</p>
       </section>
 
-      {/* Other sections remain unchanged */}
       <section className="introduction">
         <h2>About Our AUVs</h2>
         <p>
@@ -115,8 +94,6 @@ const Home = () => {
           inaccessible to humans.
         </p>
       </section>
-
-      {/* Other sections */}
     </div>
   );
 };
