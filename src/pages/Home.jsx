@@ -36,13 +36,18 @@ const Home = () => {
 
     // Load the GLTF model
     const loader = new GLTFLoader();
-    let model;
+    let modelGroup = new THREE.Group(); // Group to center the rotation
+    scene.add(modelGroup);
+
     loader.load(
       "/AUV.glb", // Correct path to your model in the public folder
       (gltf) => {
-        model = gltf.scene;
+        const model = gltf.scene;
         model.scale.set(0.3, 0.3, 0.3); // Make the model smaller
-        scene.add(model);
+
+        // Adjust the model's position to center its rotation
+        model.position.y = -0.5; // Adjust based on the model's height
+        modelGroup.add(model); // Add the model to the group
       },
       undefined,
       (error) => {
@@ -53,9 +58,10 @@ const Home = () => {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      if (model) {
-        model.rotation.y += 0.01; // Continuous rotation
-      }
+
+      // Rotate the group continuously
+      modelGroup.rotation.y += 0.01; // Continuous rotation around Y-axis
+
       renderer.render(scene, camera);
     };
     animate();
@@ -70,7 +76,7 @@ const Home = () => {
     <div className="home">
       {/* Hero Section */}
       <section className="hero" ref={heroRef}>
-        <h1>Welcome to AUV Innovations</h1>
+        <h1>Welcome to AUV MITB</h1>
         <p>Exploring the depths with cutting-edge autonomous technology</p>
       </section>
 
