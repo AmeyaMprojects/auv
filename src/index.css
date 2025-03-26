@@ -41,8 +41,22 @@ body {
   background-image: url('hero-image.jpg');
   background-size: cover;
   background-position: center;
-  color: white;
+  color: rgb(0, 0, 0);
   padding: 100px 20px;
+}
+
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  position: relative;
+  flex-direction:  column;
+}
+
+.hero canvas {
+  display: block;
+  margin: auto;
 }
 
 .introduction,

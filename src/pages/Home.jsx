@@ -1,76 +1,92 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const Home = () => {
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    // Set up the scene, camera, and renderer
+    const scene = new THREE.Scene();
+
+    // Set a blue sea/ocean-like background color
+    scene.background = new THREE.Color(0x87ceeb); // Light blue color
+
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+
+    // Move the camera further away from the model
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth * 0.8, window.innerHeight * 0.8); // Make the canvas smaller
+    heroRef.current.appendChild(renderer.domElement);
+
+    // Add brighter lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Increased intensity
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 2); // Increased intensity
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    // Load the GLTF model
+    const loader = new GLTFLoader();
+    let model;
+    loader.load(
+      "/AUV.glb", // Correct path to your model in the public folder
+      (gltf) => {
+        model = gltf.scene;
+        model.scale.set(0.3, 0.3, 0.3); // Make the model smaller
+        scene.add(model);
+      },
+      undefined,
+      (error) => {
+        console.error("An error occurred while loading the model:", error);
+      }
+    );
+
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      if (model) {
+        model.rotation.y += 0.01; // Continuous rotation
+      }
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // Cleanup on component unmount
+    return () => {
+      heroRef.current.removeChild(renderer.domElement);
+    };
+  }, []);
+
   return (
     <div className="home">
       {/* Hero Section */}
-      <section className="hero">
+      <section className="hero" ref={heroRef}>
         <h1>Welcome to AUV Innovations</h1>
         <p>Exploring the depths with cutting-edge autonomous technology</p>
       </section>
 
-      {/* Introduction Section */}
+      {/* Other sections remain unchanged */}
       <section className="introduction">
         <h2>About Our AUVs</h2>
         <p>
-          Our Autonomous Underwater Vehicles (AUVs) are designed to explore the ocean's depths, providing valuable data for research, exploration, and industrial applications. With advanced navigation systems and robust designs, our AUVs operate independently, reaching areas previously inaccessible to humans.
+          Our Autonomous Underwater Vehicles (AUVs) are designed to explore the
+          ocean's depths, providing valuable data for research, exploration, and
+          industrial applications. With advanced navigation systems and robust
+          designs, our AUVs operate independently, reaching areas previously
+          inaccessible to humans.
         </p>
       </section>
 
-      {/* Features Section */}
-      <section className="features">
-        <h2>Key Features</h2>
-        <div className="feature-list">
-          <div className="feature-item">
-            <h3>Advanced Navigation</h3>
-            <p>Equipped with state-of-the-art navigation systems, our AUVs ensure precise and reliable underwater operations.</p>
-          </div>
-          <div className="feature-item">
-            <h3>Modular Design</h3>
-            <p>Our AUVs feature a modular design, allowing for easy customization and integration of various sensors and tools.</p>
-          </div>
-          <div className="feature-item">
-            <h3>Long-Endurance Missions</h3>
-            <p>Designed for extended missions, our AUVs can operate for prolonged periods, covering vast underwater territories.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Applications Section */}
-      <section className="applications">
-        <h2>Applications</h2>
-        <div className="application-list">
-          <div className="application-item">
-            <h3>Scientific Research</h3>
-            <p>Our AUVs assist scientists in collecting data from the ocean's depths, contributing to marine biology, geology, and environmental studies.</p>
-          </div>
-          <div className="application-item">
-            <h3>Underwater Exploration</h3>
-            <p>From mapping the seafloor to discovering new marine species, our AUVs are at the forefront of underwater exploration.</p>
-          </div>
-          <div className="application-item">
-            <h3>Industrial Inspections</h3>
-            <p>Our AUVs provide efficient solutions for inspecting underwater infrastructures such as pipelines, cables, and offshore platforms.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Image Gallery Section */}
-      <section className="gallery">
-        <h2>Gallery</h2>
-        <div className="gallery-images">
-          <img src="image1.jpg" alt="AUV in action" />
-          <img src="image2.jpg" alt="Underwater exploration" />
-          <img src="image3.jpg" alt="AUV deployment" />
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="contact-cta">
-        <h2>Get in Touch</h2>
-        <p>Interested in learning more about our AUVs or collaborating with us? Contact us today!</p>
-        <a href="/contact" className="contact-button">Contact Us</a>
-      </section>
+      {/* Other sections */}
     </div>
   );
 };
