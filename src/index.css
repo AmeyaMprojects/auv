@@ -190,13 +190,14 @@ body,
 .main-content {
   flex: 1;
 }
+/* Water-themed loading screen */
 .loading-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9); /* Dark background */
+  background: linear-gradient(to bottom, #0077b6, #00b4d8); /* Water gradient */
   color: white;
   display: flex;
   flex-direction: column;
@@ -204,21 +205,52 @@ body,
   align-items: center;
   font-size: 20px;
   z-index: 1000;
+  overflow: hidden;
 }
 
-.spinner {
-  width: 50px;
-  height: 50px;
+.loading-screen .spinner {
+  width: 60px;
+  height: 60px;
   border: 5px solid rgba(255, 255, 255, 0.3);
   border-top: 5px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
+.loading-screen .waves {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+  background: url('wave.svg') repeat-x; /* Add a wave SVG image */
+  animation: wave 4s linear infinite;
+  z-index: 1;
+}
+
+.loading-screen p {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Spinner animation */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
+/* Wave animation */
+@keyframes wave {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 1000px;
+  }
+}
 

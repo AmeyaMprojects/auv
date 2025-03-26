@@ -5,9 +5,23 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 const Home = () => {
   const heroRef = useRef(null);
   const animationId = useRef(null); // To store the animation frame ID
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [isLoading, setIsLoading] = useState(() => {
+    // Check if the loading screen has already been shown
+    return !localStorage.getItem("hasLoaded");
+  });
 
   useEffect(() => {
+    if (isLoading) {
+      // Set a timeout to hide the loading screen after 5 seconds
+      const loadingTimeout = setTimeout(() => {
+        setIsLoading(false);
+        localStorage.setItem("hasLoaded", "true"); // Mark the loading screen as shown
+      }, 5000);
+
+      return () => clearTimeout(loadingTimeout); // Cleanup timeout on unmount
+    }
+
+    // Set up the scene, camera, and renderer
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87ceeb); // Light blue color
 
@@ -41,7 +55,6 @@ const Home = () => {
         model.scale.set(0.3, 0.3, 0.3);
         model.position.y = -0.5;
         modelGroup.add(model);
-        setIsLoading(false); // Hide loading screen when model is loaded
       },
       undefined,
       (error) => {
@@ -57,33 +70,41 @@ const Home = () => {
     animate();
 
     return () => {
-      if (animationId.current) cancelAnimationFrame(animationId.current);
-      if (heroRef.current) heroRef.current.removeChild(renderer.domElement);
+      if (animationId.current) {
+        cancelAnimationFrame(animationId.current);
+      }
+      if (heroRef.current) {
+        heroRef.current.removeChild(renderer.domElement);
+      }
       scene.traverse((object) => {
         if (object.geometry) object.geometry.dispose();
         if (object.material) {
-          if (Array.isArray(object.material)) object.material.forEach((mat) => mat.dispose());
-          else object.material.dispose();
+          if (Array.isArray(object.material)) {
+            object.material.forEach((material) => material.dispose());
+          } else {
+            object.material.dispose();
+          }
         }
       });
       renderer.dispose();
     };
-  }, []);
+  }, [isLoading]);
+
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="home">
-      {isLoading && (
-        <div className="loading-screen">
-          <div className="spinner"></div>
-          <p>Loading...</p>
-        </div>
-      )}
-      
       <section className="hero" ref={heroRef}>
-        <h1>Welcome to AUV MITB</h1>
+        <h1>Welcome to AUV Innovations</h1>
         <p>Exploring the depths with cutting-edge autonomous technology</p>
       </section>
-
       <section className="introduction">
         <h2>About Our AUVs</h2>
         <p>
